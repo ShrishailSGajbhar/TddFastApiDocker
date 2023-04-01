@@ -1,17 +1,27 @@
+import os
+
 from fastapi import FastAPI, Depends
+from tortoise.contrib.fastapi import register_tortoise
+
 from app.config import get_settings, Settings
+
+
 app = FastAPI()
 
 
-@app.get("/")
-def index():
-    return {"message": "Learning Test driven developement using FastAPI, pytest & Docker. Next try with route '/ping'."}
+register_tortoise(
+    app,
+    db_url=os.environ.get("DATABASE_URL"),
+    modules={"models": ["app.models.tortoise"]},
+    generate_schemas=False,  # updated
+    add_exception_handlers=True,
+)
 
 
 @app.get("/ping")
 async def pong(settings: Settings = Depends(get_settings)):
     return {
-        "ping": "pong!!",
+        "ping": "pong!",
         "environment": settings.environment,
         "testing": settings.testing
     }
